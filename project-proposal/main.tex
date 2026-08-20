@@ -1,28 +1,14 @@
-\documentclass[11pt,a4paper]{article}
+\documentclass[12pt,a4paper]{article}
 \usepackage[margin=1in]{geometry}
 \usepackage{hyperref}
 \usepackage{enumitem}
 \usepackage{graphicx}
 \usepackage{xcolor}
-
-% -----------------------------------------------------
-% bvraghav-tiet-ucs503p-article.sty
-% -----------------------------------------------------
-
-% Variable: Lab Instructor
-\makeatletter \newcommand{\BvrSetLabInstructor}[1]{%
-  \gdef\Bvr@LabInstructor{#1}}
-% default
-\newcommand{\Bvr@LabInstructor}{Dr. Raghav %
-  B. Venkataramaiyer}
-% public accessor
-\newcommand{\BvrLabInstructorValue}{\Bvr@LabInstructor}
-\makeatother
-
-% Add subtitle
 \usepackage{titling}
-% -- Set title bold
-\pretitle{\begin{center}\bfseries\fontsize{18bp}{18bp}\selectfont}
+\pretolerance=10000
+\tolerance=10000
+\setlength{\emergencystretch}{3em}
+
 \makeatletter
 \newcommand{\BvrSubtitle}[1]{%
   \posttitle{%
@@ -32,30 +18,23 @@
 }
 \makeatother
 
-% Hints in the section title(s)
-\newcommand{\BvrHint}[1]{%
-  {\normalfont\normalsize\itshape\hfill #1}}
 
-% -----------------------------------------------------
-
-\title{Grievance-Resolution System for a Tier-2/3 City}
-
-\BvrSetLabInstructor{Dr. Raghav B. Venkataramaiyer}
+\title{\textbf{Campus Marketplace}}
 
 \BvrSubtitle{%
   Project Proposal for UCS503P  \\
-  Submitted to: \BvrLabInstructorValue \\ \bfseries
+  Submitted to: Dr. Raghav B. Venkataramaiyer \\ \bfseries
   Thapar Institute of Engineering and Technology% 
 }
 
 \author{
-  Vidya Vaidyanathan, CSED%
-  \thanks{Roll No: \texttt{1024030xxx}, %
-    Email: \texttt{vvaidhanathan\_be24\@thapar.edu}}
-  \and 
-  Bhanurekha Ganesan, CSED%
-  \thanks{Roll No: \texttt{1024030xxx}, %
-    Email: \texttt{bganesan\_be24\@thapar.edu}}
+  Team Enigma%
+  \thanks{Aditya Kaushik, %
+    \underline{Roll No:} \texttt{1024030025}, %
+    \underline{Email:} \texttt{aaditya\_be24@thapar.edu},  \\%
+    \hspace*{2.1em}Priyansh Singh Chouhan, %
+    \underline{Roll No:} \texttt{1024030929}, %
+    \underline{Email:} \texttt{pchouhan\_be24@thapar.edu}}
 }
 
 \date{\today}
@@ -63,180 +42,117 @@
 \begin{document}
 \maketitle
 
-\section{Higher-order goal%
-  \BvrHint{\ldots secondary framing}}
-This project aims to improve sustainable urban
-governance by reducing the time and effort required to
-resolve citizen issues. While the topic is broader than
-any single municipality, the immediate engineering
-objective is to translate \emph{efficient public
-  service delivery} into a measurable, deployable
-software solution.
-
-\section{Time-to-value %
-\BvrHint{\ldots primary heuristic}}
+\section{Time-to-value}
 \begin{itemize}[leftmargin=0.7cm]
     \item We will deliver meaningful increments quickly by prototyping the core user workflow and validating it with users within a short iteration window.
-    \item We will prioritize fast feedback over perfection by using weekly iterations (and targeting CI-backed automation early) to reduce release friction.
+    \item We will prioritize fast feedback over perfection by using weekly iterations to reduce release friction.
     \item Success is defined by what can be delivered and measured in the first iteration, then improved based on user feedback.
 \end{itemize}
 
 \section{Problem Statement}
-Citizens in a tier-2/3 Indian city face delays and uncertainty when reporting local issues (e.g., streetlight outages, water leakage, garbage accumulation, road potholes). Common pain points include:
+Our campus (and college campuses in general) generate a constant churn of physical items, students arrive with belongings, need more as the semester goes on (especially during the first semester), and leave most of it behind or discard it when they graduate. This creates two connected but distinct problems:-
 \begin{itemize}[leftmargin=0.7cm]
-    \item \textbf{Fragmentation:} complaints are often made via multiple channels (calls, social media, paper forms), causing lost context.
-    \item \textbf{Low transparency:} citizens cannot easily see the status of their complaint (e.g., ``received'', ``assigned'', ``in progress'', ``resolved'').
-    \item \textbf{Slow coordination:} departments/field teams lack a unified, trackable workflow with clear ownership.
-    \item \textbf{Poor data quality:} duplicate or incomplete reports force rework and extend resolution time.
+    \item \textbf{Inefficient buying and selling of used items:}
+Students frequently need affordable second-hand items (like bicycles, furniture, textbooks, appliances), but have no centralized, trustworthy platform to find them within this campus community. The current options we have are general marketplaces like Facebook Marketplace or OLX. These are not campus-specific and involve dealing with strangers off-campus, lack verification of buyers/sellers, and make logistics (meeting, payment, delivery) needlessly complicated for what should be a short walk across campus. Alternatively, students rely on social media posts or simply asking around, but these methods have limited reach and rarely produce enough options to compare. So, it makes it hard to find the best variety or the most affordable deal.
+    \item \textbf{No easy way to borrow rarely-used items:}
+Many items students own are needed only occasionally, like a drill, a gaming controller, a formal blazer for one event, project-specific equipment, etc. Buying these outright is wasteful and expensive, yet there is no structured system for students to lend and borrow such items within this campus network. As a result, students either overspend on things they will barely use or have to source it manually through word-of-mouth or social media apps.
 \end{itemize}
 
-\textbf{Why this matters now (contextual relevance):} In an urban setting with limited staff bandwidth, even small process improvements can noticeably reduce resolution delays and repeated submissions.
-
-\section{Proposed Solution %
-\BvrHint{\ldots Software Proposition}}
+\section{Proposed Solution}
 \subsection{Overview}
-Build a \textbf{web-based} ``Grievance-to-Resolution'' system with the following components:
-\begin{itemize}[leftmargin=0.7cm]
-    \item \textbf{Citizen submission portal:} users submit an issue with photo (optional), category, and locality/ward.
-    \item \textbf{Automated triage:} basic duplicate detection and completeness checks.
-    \item \textbf{Department workflow:} assign issues to relevant department/team and update statuses.
-    \item \textbf{Status transparency:} citizens track status and receive notifications when resolved.
-    \item \textbf{Admin/ops dashboard:} performance summaries (resolution time, backlog).
-\end{itemize}
-
-\subsection{Core workflow}
+We propose Campus Marketplace, a campus-exclusive platform restricted to @thapar.edu accounts that unifies two modes of resource exchange in one system: permanent buying/selling of used items and temporary borrowing/lending of items needed only occasionally. Every listing is created as either a SELL or BORROW type, each with its own pricing model (price for sale, price per day for borrowing), so the same underlying platform serves both use cases without becoming two disconnected apps.
+\subsection{Core Workflow}
 \begin{enumerate}[leftmargin=0.7cm]
-    \item Citizen creates a complaint and receives a complaint ID immediately.
-    \item System validates completeness and suggests possible duplicates (lightweight similarity on text/category and approximate location).
-    \item Department staff update status (Received $\rightarrow$ Assigned $\rightarrow$ In Progress $\rightarrow$ Resolved).
-    \item Citizen views status updates and resolution notes.
+    \item \textbf{Verified onboarding}: Users sign up with their Thapar email (@thapar.edu only), linked to a unique user profile before they can list, request, or borrow anything.
+    \item \textbf{Listing creation}: A user posts an item under a category, with a title, description, type (SELL/BORROW), price or daily rate, and photos. Once created, a listing is immutable, meaning sellers relist rather than edit their posts, keeping transaction history accurate and disputes traceable.
+    \item \textbf{Buying flow}: Interested buyers raise a purchase request on a listing. The owner accepts or rejects it. If accepted, it auto-generates a transaction and auto-rejects any other pending requests on that listing, since an item can only be sold once.
+    \item \textbf{Borrowing flow}: Interested borrowers propose a start and end time on a BORROW listing. Once accepted, a borrowing record is created with an auto-computed total amount ($price\_per\_day \times days$), and the system blocks any overlapping booking requests for that same listing.
+    \item \textbf{Hostel-based discovery}: Listings are filterable by hostels, so users can search and filter for items in their own vicinity, making handoffs quick and easy.
+    \item \textbf{Due-date reminders}: For active borrowings, the webiste sends automated reminders as the end time approaches, and a follow-up nudge if an item isn't marked returned on time, reducing the need for lenders to chase borrowers manually.
+    \item \textbf{Closure and trust-building}: Once a transaction is completed or a borrowing is returned, both parties can leave a rating and review of each other, building a visible trust score over time.
 \end{enumerate}
-
-\subsection{Operational constraints for an educational, tier-2/3 setting}
+\subsection{Operational Constraints}
+To keep the system consistent and abuse-resistant, a few rules are enforced at the data/business-logic level:-%
 \begin{itemize}[leftmargin=0.7cm]
-    \item Keep the solution usable on low-to-mid range devices via responsive web design.
-    \item Avoid dependence on advanced research algorithms; focus on workflow, automation, and system correctness.
-    \item Design for deployability using common web hosting and managed databases.
+    \item A listing can carry either a sale price or a daily rate, never both.
+    \item Status transitions (for a borrowing or purchase request) follow a fixed state machine. An item can't jump from pending state straight to returned/completed state, skipping the intermediate states.
+    \item Each listing can only ever produce one final transaction. The transaction amount must match the listing's price, and the recorded seller must be the item's actual owner.
+    \item A buyer/listing pair can have at most one pending and one accepted request at a time.
+    \item Reviews are only permitted once a deal is closed (completed transaction or returned borrowing), and only from the two actual parties involved, i.e. one review per person per deal.
 \end{itemize}
 
-\section{Solution Approach %
-\BvrHint{\ldots Engineering focus}}
-This is an engineering course project, so we focus on scalable administrative and workflow aspects rather than novel algorithm research.
-
-\subsection{Duplicate/quality assistance %
-\BvrHint{\ldots non-research}}
-Duplicate detection will be heuristic-based:
+\section{Solution Approach}
+This is an engineering course project, so we focus on scalable administrative and workflow aspects rather than novel algorithm research.%
 \begin{itemize}[leftmargin=0.7cm]
-    \item Normalize text (category + short description keywords).
-    \item Use a simple similarity measure (e.g., token overlap / TF-IDF cosine with threshold) without claiming state-of-the-art.
-    \item Show top candidate duplicates to staff for decision; never fully auto-delete or auto-reject.
+    \item \textbf{Identity-gated access as the trust layer:} Instead of building verification systems from scratch, campus email verification is the single source of trust. It is cheap to enforce, hard to fake, and immediately scoped to the right user base.
+    \item \textbf{State-machine-driven transactions:} Purchases and borrowings move through explicit, restricted status transitions rather than free-form updates. This makes the system's behavior predictable, auditable, and easy to extend without rewriting core logic.
+    \item \textbf{Immutable listings for accountability:} Treating listings as append-only (relist instead of edit) keeps a clean historical record. This is useful for resolving disputes, generating trust scores, and future admin auditing, at negligible engineering cost.
+    \item \textbf{Conflict prevention by design:} Overlapping booking checks and single transaction per listing rules prevent double-selling or double-booking at the data layer itself, rather than requiring manual moderation to catch these cases after the fact.
+    \item \textbf{Location-aware filtering:} Hostel filtering is a simple, scalable filter on existing listing data. It improves discovery without needing any recommendation engine.
+    \item \textbf{Reminders as scheduled jobs:} Return-date nudges can run as simple scheduled checks against end time values, keeping the borrowing flow self-managing without needing constant lender follow-up or admin intervention.
+    \item \textbf{Thin backend, managed storage:} Node.js handles routes, business logic, and validation, while Supabase offloads authentication and file storage, reducing the surface area the team needs to build and maintain themselves, so effort stays focused on marketplace logic rather than infrastructure.
 \end{itemize}
 
-\subsection{Web architecture %
-\BvrHint{\ldots web-based solution}}
-A typical 3-tier web architecture:
+\section{Engine Availability}
+A mature set of "engines" (tooling/services) is available to implement this as a project:-
 \begin{itemize}[leftmargin=0.7cm]
-    \item \textbf{Frontend:} responsive UI for citizens and staff (status pages, submission form, dashboard).
-    \item \textbf{Backend API:} authentication, complaint submission, status transitions, assignment logic.
-    \item \textbf{Database:} store users, complaints, status history, attachments metadata.
+    \item The frontend (React) is a static, decoupled layer that can be served independently of backend uptime even during backend maintenance, cached pages can degrade gracefully rather than fail completely.
+    \item The backend (Node.js) is stateless by design (routes, controllers, business logic, validation). No session state lives on the server itself, so it can be horizontally scaled or restarted without losing in-flight user context.
+    \item Supabase offloads auth and storage to a managed service with its own uptime guarantees, reducing the availability burden on the custom backend. The team isn't responsible for keeping authentication or file storage alive themselves.
+    \item PostgreSQL is used for core data storage. Since listings are immutable and status transitions are restricted, the data layer stays consistent even under concurrent access, which matters more for reliability than raw uptime percentage at this scale.
 \end{itemize}
 
-\subsection{CI/CD and fast delivery enabler}
-CI/CD will be used to:
+\section{Scalability}
+The current direction is one website per campus, each an isolated community. However, there are a few refinements we think are worth considering:-
 \begin{itemize}[leftmargin=0.7cm]
-    \item Automatically build and run tests on every change.
-    \item Produce repeatable deployment artifacts to staging.
-    \item Enable safe and frequent releases of incremental features.
+    \item \textbf{Data isolation via campus scoping, not separate deployments:} Rather than literally standing up a new website per college (which multiplies infrastructure and maintenance cost), the schema can add a campus id to users and scope every query by it. One shared backend and database serve all campuses, but a Thapar user only ever sees Thapar listings. Thus it will have same operational cost as one website, and same trust boundary as separate ones.
+    \item \textbf{Email-domain-based campus binding:} Since trust is already anchored to verified college email (@thapar.edu), each new campus just registers its email domain, and the isolation is enforced at signup. Hence, no need for separate infrastructure per campus.
+    \item \textbf{Horizontal scaling of the backend:} Since Express handlers are stateless, adding campuses mainly adds read/write load, which can be handled by scaling backend instances behind a load balancer, rather than needing a redesign.
+    \item \textbf{Shared category layer:} Categories can stay shared, so the team doesn't have to maintain duplicate reference data per campus.
+    \item \textbf{Growth path:} We start with one campus to validate the workflow, then onboard additional campuses as isolated logical communities within the same system. This avoids re-architecting later and keeps a single codebase, single admin panel, and single set of integrity rules enforced everywhere.
 \end{itemize}
 
-\section{Evaluation Criterion %
-\BvrHint{\ldots measurable and attributable}}
-We define success using measurable metrics tied to the core workflow.
-
-\subsection{Primary evaluation metric}
-\textbf{Time-to-acknowledgement (TTA):} time between complaint submission and ``Received/Assigned'' status creation in the system.
+\section{Evaluation Criterion}
+Success can be measured across a few dimensions:-
 \begin{itemize}[leftmargin=0.7cm]
-    \item Target: median TTA $\le$ 2 hours during pilot window.
-    \item Attribution: measured from database timestamps (submission vs. first status update by staff).
+    \item \textbf{Adoption:} Number of verified users per campus, active listings per week, ratio of listings created to listings actually resulting in a transaction/borrowing.
+    \item \textbf{Trust and reliability:} Average rating/review scores, dispute rate (for e.g. items not returned, mismatched transaction amounts, etc.), percentage of borrowings returned on time versus requiring reminder escalation.
+    \item \textbf{Efficiency of exchange:} Average time from listing creation to the request being accepted, and time from request to transaction completion.
+    \item \textbf{Resource utilization:} Ratio of borrow transactions to sell transactions (a good split reflects the platform genuinely encouraging sharing over unnecessary buying, which supports sustainability).
+    \item \textbf{System health:} Request latency, job success rate for reminders, and constraint-violation rate (how often the state-machine/integrity rules catch invalid transitions).
 \end{itemize}
 
-\subsection{Secondary evaluation metrics}
+\section{Higher-Order Goal}
+Beyond the immediate utility of "buy, sell, borrow items on campus," the platform's broader aim is to normalize resource-sharing as the default behavior within a trusted community, rather than an occasional favor asked of friends. By reducing the friction, risk, and search cost involved in buying second-hand or borrowing instead of purchasing new, the website aims to:
 \begin{itemize}[leftmargin=0.7cm]
-    \item \textbf{Resolution time reduction:} reduce time-to-resolved compared to baseline process (even if baseline is collected via survey).
-    \item \textbf{Duplicate rate:} percentage of complaints flagged as duplicates and resolved without rework.
-    \item \textbf{User clarity:} citizen-reported clarity of status using a simple 1--5 feedback question.
-    \item \textbf{Reliability:} availability of staging/production for login and submission during business hours (e.g., $\ge$ 99\% uptime in pilot).
+    \item Cut down unnecessary spending and waste generated by short-lived student needs.
+    \item Extend the useful life of physical items by keeping them circulating within a community instead of ending up discarded when a student graduates.
+    \item Improve trust, accountability and sustainability of the community.
 \end{itemize}
 
-\subsection{Pilot validation plan %
-\BvrHint{\ldots high-level}}
+\section{Project Scope and deliverables}
+\subsection{Initial Deliverable}
 \begin{itemize}[leftmargin=0.7cm]
-    \item Recruit 10--20 pilot users (citizens) and 3--5 staff roles (department simulation if real staff unavailable).
-    \item Compare metrics before/after within the iteration window by logging baseline estimates via short interviews or existing process observations.
+    \item Core DB Schema with integrity rules enforced.
+    \item Student login authentication and profile setup
+    \item Create, browse and search listings (with Hostel-based filtering)
+    \item Transaction constraints and implementation based on type of request (Buy or Borrow)
 \end{itemize}
-
-\section{Scalability %
-\BvrHint{\ldots with foresight}}
-The proposition should scale in both theoretical and practical senses.
-
-\begin{enumerate}[leftmargin=0.7cm]
-    \item \textbf{Scalable (theoretically):} The system should support growth in number of complaints and concurrent dashboard usage by:
-    \begin{itemize}[leftmargin=0.7cm]
-        \item decoupling components (frontend/backend),
-        \item enabling pagination and indexing for common queries,
-        \item using stateless API design.
-    \end{itemize}
-    
-    \item \textbf{Operationally deployable (practically):} The system should run on common web hosting:
-    \begin{itemize}[leftmargin=0.7cm]
-        \item managed database,
-        \item containerized or platform-hosted deployment,
-        \item CI/CD pipeline for staging/production.
-    \end{itemize}
-\end{enumerate}
-
-\section{Engine availability heuristic}
-A mature set of ``engines'' (tooling/services) is available to implement this as a web-based project:
-\begin{itemize}[leftmargin=0.7cm]
-    \item Web framework for REST APIs and templated/reactive pages.
-    \item Managed relational or document database.
-    \item Authentication approach (token-based or session-based).
-    \item Object storage for optional attachments (or local storage for pilot).
-    \item Test framework for unit/integration tests.
-    \item CI runner and staging deployment target.
-\end{itemize}
-We will use these mature components to focus on workflow design, correctness, and measurement rather than inventing new infrastructure.
-
-\section{Project scope and deliverables %
-\BvrHint{\ldots iteration-friendly}}
-\subsection{Initial deliverable %
-\BvrHint{\ldots first iteration}}
-\begin{itemize}[leftmargin=0.7cm]
-    \item Citizen submission form + complaint ID generation
-    \item Staff workflow: update status and assignment
-    \item Citizen status page: view timeline/history
-    \item Basic logging and timestamps for TTA measurement
-    \item CI: build + backend unit tests + linting
-    \item CD to staging with a single command or pipeline job
-\end{itemize}
-
-\subsection{Subsequent deliverables}
-\begin{itemize}[leftmargin=0.7cm]
-    \item Lightweight duplicate suggestions with staff review
-    \item Notification layer (email/SMS optional in later iteration; can start with in-app notifications)
-    \item Admin dashboard for metrics and backlog
-    \item Improved search/filtering and indexed queries for scale readiness
+\subsection{Subsequent Deliverable}
+\begin{itemize}
+    \item Automated return-date reminders
+    \item Ratings and reviews post transaction/return
 \end{itemize}
 
 \section{Risks and mitigations}
-\begin{itemize}[leftmargin=0.7cm]
-    \item \textbf{Data privacy / consent:} minimize collected data; keep attachments optional; store only what is needed.
-    \item \textbf{Staff adoption:} provide an easy UI for status updates; keep workflow steps minimal; include shortcuts.
-    \item \textbf{Evaluation measurement ambiguity:} instrument timestamps and define clear status transitions before development begins.
-    \item \textbf{Operational issues in pilot:} use staging early; ensure CI/CD produces repeatable deployments.
+\begin{itemize}
+    \item \textbf{Low initial adoption of the website:} Mitigated by seeding launch in our own hostel and encouraging early listings before public rollout.
+    \item \textbf{Items not returned on time or borrower disputes:} Mitigated by automated reminders, tracking status of borrowings, and review history that flags repeat offenders.
+    \item \textbf{Fake or duplicate accounts:} Mitigated by restricting signup to verified @thapar.edu email addresses.
+    \item \textbf{Data inconsistency:} Mitigated by enforcing integrity rules like overlap checks and restricted status transitions directly at the database layer.
+    \item \textbf{Users bypassing the website after first contact:} Mitigated by keeping the website flow low-friction enough to remain the easiest path, rather than something users work around.
 \end{itemize}
 
 \section{Summary}
-This project proposes a deployable web platform to reduce grievance handling delays in a tier-2/3 city context. It meets the course criteria by emphasizing time-to-value through rapid iterations, implementing CI/CD to support frequent safe releases, and using measurable evaluation criteria (especially time-to-acknowledgement). It remains focused on engineering workflow and scalability readiness rather than research-driven novelty.
-
+Campus Marketplace is a campus-exclusive marketplace that unifies buying-selling and borrowing-lending of everyday items within a verified student community. Built on a React/Node.js/PostgreSQL stack with Supabase for auth and storage, it enforces trust and data integrity through email verification, immutable listings, and restricted status transitions rather than complex algorithms. With hostel-based filtering and automated return reminders, the platform reduces friction in peer-to-peer exchange, aiming to cut unnecessary spending and item waste while making resource-sharing a normal part of campus life, with a scoped design that can extend to multiple campuses or similar trusted communities over time.
 \end{document}
