@@ -1,6 +1,6 @@
 # Campus Marketplace
  
- ![Tiet Logo](../assets/tiet-logo.svg)
+ ![Tiet Logo](assets/tiet-logo.svg)
 
 **UCS503: Software Engineering (Project)**  
 **TIET Patiala**
