@@ -1,0 +1,56 @@
+/* =========================================
+   MAIN LAYOUT & GRID
+   ========================================= */
+
+.main-window {
+  position: relative;
+  margin-top: 64px; 
+  min-height: calc(100vh - 64px);
+}
+
+.main-window-content {
+  /* Leaves room for the absolutely positioned 240px sidebar */
+  margin-left: 240px;
+  padding: 2rem 3rem;
+  max-width: 1400px;
+  color: var(--page-text);
+  transition: color 0.4s ease;
+}
+
+/* Responsive card grid - fills as many columns as fit at ~220px each */
+.listing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+/* =========================================
+   STATES (Empty & Error)
+   ========================================= */
+
+.main-window-error {
+  color: #EA1B23; /* Your signature red */
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 500;
+  padding: 1rem 0;
+}
+
+.main-window-empty {
+  color: var(--sidebar-text-muted); /* Leverages the gray from your dark mode setup */
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.9rem;
+  padding: 1rem 0;
+}
+
+/* =========================================
+   MOBILE RESPONSIVENESS
+   ========================================= */
+
+@media (max-width: 720px) {
+  .main-window-content {
+    /* Resets the margin because the sidebar stacks on top on mobile */
+    margin-left: 0; 
+    padding: 1.5rem;
+  }
+}

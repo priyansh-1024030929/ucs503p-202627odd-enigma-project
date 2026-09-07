@@ -1,0 +1,274 @@
+.description-window {
+  max-width: 1000px;
+  /* 90px top margin clears the fixed navbar! */
+  margin: 90px auto 3rem auto; 
+  padding: 0 1.5rem;
+  color: var(--text-primary, #111);
+}
+
+.description-back {
+  display: inline-block;
+  margin-bottom: 1rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.9rem;
+  text-decoration: none;
+  color: var(--text-muted, #666);
+  transition: color 0.2s;
+}
+
+.description-back:hover {
+  color: var(--primary-color, #EA1B23);
+}
+
+.description-content {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-color, #eaeaea);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+}
+
+body.dark .description-content {
+  background: var(--bg-surface, #1e1e1e);
+  border-color: var(--border-color, #333);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* --- GALLERY LAYOUT --- */
+.description-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* The box holding the big image */
+.main-image-container {
+  width: 100%;
+  aspect-ratio: 4 / 3; /* Keeps the box size consistent */
+  background-color: var(--gallery-bg);
+  border: 1px solid var(--gallery-border);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.main-image {
+  max-width: 100%;
+  max-height: 100%;
+  /* CRITICAL: 'contain' stops it from cutting off! */
+  object-fit: contain; 
+}
+
+/* The row of small clickable images */
+.thumbnail-row {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto; /* Allows scrolling if they upload 5+ images */
+  padding-bottom: 0.5rem; /* Space for the scrollbar */
+}
+
+.thumbnail {
+  width: 80px;
+  height: 80px;
+  object-fit: cover; /* It is okay to crop thumbnails */
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: var(--thumbnail-opacity);
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.thumbnail:hover,
+.thumbnail.active {
+  opacity: 1;
+  border-color: var(--primary-color, #EA1B23);
+  box-shadow: 0 0 8px rgba(255, 0, 0, 0.2);
+}
+
+.no-image {
+  color: var(--text-muted, #777);
+  font-family: monospace;
+}
+
+/* =========================================
+   DETAILS STYLES
+   ========================================= */
+
+.description-details {
+  flex: 1 1 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.description-details h1 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.description-category {
+  align-self: flex-start;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  font-weight: bold;
+  background: var(--primary-color, #EA1B23);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.description-price {
+  font-family: var(--font-mono, monospace);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary, #111);
+}
+
+body.dark .description-price {
+  color: #fff;
+}
+
+.description-text {
+  color: var(--text-muted, #555);
+  line-height: 1.6;
+  white-space: pre-wrap; /* Preserves line breaks from the textarea */
+}
+
+body.dark .description-text {
+  color: #bbb;
+}
+
+.description-meta {
+  font-size: 0.95rem;
+  color: var(--text-muted, #666);
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color, #eaeaea);
+}
+
+body.dark .description-meta {
+  border-color: #444;
+}
+
+/* =========================================
+   BUTTONS & FORMS
+   ========================================= */
+
+.description-contact-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 1rem;
+  background: var(--primary-color, #EA1B23);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 20px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.description-contact-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.description-contact-btn:disabled {
+  background: #666;
+  cursor: not-allowed;
+}
+
+.description-borrow-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 1rem;
+}
+
+.description-borrow-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.description-borrow-form input {
+  padding: 10px;
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 6px;
+  background: var(--input-bg, #fff);
+  color: var(--text-primary, #111);
+  font-family: inherit;
+}
+
+body.dark .description-borrow-form input {
+  border-color: #444;
+  background: #222;
+  color: #fff;
+}
+
+/* Ensure the calendar icon inside datetime-local looks okay in dark mode */
+body.dark .description-borrow-form input::-webkit-calendar-picker-indicator {
+  filter: invert(1); 
+}
+
+.description-error-msg {
+  color: #ff4d4f;
+  font-weight: 500;
+  margin-top: 10px;
+}
+
+.description-sent {
+  color: #28a745;
+  font-weight: 600;
+  margin-top: 1rem;
+  padding: 12px;
+  background: rgba(40, 167, 69, 0.1);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.description-error {
+  text-align: center;
+  padding: 100px 20px;
+  color: var(--text-muted, #666);
+}
+
+.description-owner-message {
+  padding: 1rem;
+  margin-top: 1rem;
+  background-color: var(--owner-bg);
+  border: 1px solid var(--owner-border);
+  border-radius: 8px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.owner-message-text {
+  margin: 0;
+  font-weight: 700;
+  color: var(--owner-text);
+  transition: color 0.2s ease;
+}
+
+.sold-badge {
+  display: inline-block;
+  background-color: #EA1B23;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
