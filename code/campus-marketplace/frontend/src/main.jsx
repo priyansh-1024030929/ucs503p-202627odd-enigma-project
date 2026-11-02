@@ -3,11 +3,12 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter, useNavigate } from 'react-router-dom'
 import { Auth0Provider } from '@auth0/auth0-react'
 import App from './App.jsx'
+import { getInternalReturnTo } from './auth/navigation.js'
 import './index.css'
 
 function Auth0ProviderWithNavigate({ children }) {
   const navigate = useNavigate()
-  const onRedirectCallback = (appState) => navigate(appState?.returnTo || '/')
+  const onRedirectCallback = (appState) => navigate(getInternalReturnTo(appState?.returnTo))
 
   return (
     <Auth0Provider

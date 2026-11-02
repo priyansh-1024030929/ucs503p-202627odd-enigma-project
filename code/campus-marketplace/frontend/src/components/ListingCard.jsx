@@ -1,17 +1,11 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import LoadingSpinner from './LoadingSpinner'
 import './ListingCard.css'
 
 export default function ListingCard({ listing }) {
-  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
   const handleClick = () => {
-    setLoading(true);
-    setTimeout(() => {
-      navigate(`/listing/${listing.listing_id}`);
-    }, 400);
+    navigate(`/listing/${listing.listing_id}`)
   }
 
   // Format the price based on SELL vs BORROW
@@ -21,6 +15,7 @@ export default function ListingCard({ listing }) {
     
   // Temporarily show the category_id until the backend is updated with a JOIN
   const displayCategory = listing.category_name || `Category ${listing.category_id}`
+  const borrowUntil = listing.borrowed_until ? new Date(listing.borrowed_until).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : null
 
   return (
     <div className="listing-card">
@@ -37,20 +32,16 @@ export default function ListingCard({ listing }) {
           </div>
         )}
       <div className="listing-card-body">
+        {borrowUntil && <span className="listing-card-availability">Borrowed until {borrowUntil}</span>}
         <div className='listing-card-info'>
           <h3 className='listing-card-title'>{listing.title}</h3>
           <p className="listing-card-desc">{listing.description}</p>
           <span className="listing-card-price">{priceLabel}</span>
         </div>
-        <button className="listing-card-btn" onClick={handleClick} disabled={loading}>
+        <button className="listing-card-btn" onClick={handleClick} aria-label={`More details about ${listing.title}`}>
           More details
         </button>
       </div>
-      {loading && (
-         <div className="listing-card-overlay">
-           <LoadingSpinner label="Opening..." />
-         </div>
-        )}
     </div>
   )
 }

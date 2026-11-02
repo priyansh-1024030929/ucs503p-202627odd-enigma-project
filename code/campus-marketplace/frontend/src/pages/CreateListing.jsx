@@ -1,16 +1,19 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
-import { createListing } from '../api/api'
-import { useRef } from 'react'
+import { createListing, getCurrentUser } from '../api/api'
+import { useEffect, useRef } from 'react'
 import LoadingSpinner from '../components/LoadingSpinner'
 import './CreateListing.css'
+import { beginLogin } from '../auth/navigation'
 
 export default function CreateListing() {
-  const { getAccessTokenSilently } = useAuth0()
+  const { getAccessTokenSilently, isAuthenticated, isLoading, loginWithRedirect } = useAuth0()
   const navigate = useNavigate()
+  const location = useLocation()
   
   const [saving, setSaving] = useState(false)
+  const [feedback, setFeedback] = useState('')
   const [images, setImages] = useState([])
   const [form, setForm] = useState({
     title: '',
@@ -21,11 +24,38 @@ export default function CreateListing() {
     price_per_day: ''
   })
   const fileInputRef = useRef(null)
+  const guardStarted = useRef(false)
+  const [checkingProfile, setCheckingProfile] = useState(true)
+  const [guardError, setGuardError] = useState('')
+
+  useEffect(() => {
+    if (isLoading || guardStarted.current) return
+    guardStarted.current = true
+    const target = `${location.pathname}${location.search}${location.hash}`
+    if (!isAuthenticated) {
+      beginLogin(loginWithRedirect)
+      return
+    }
+    getAccessTokenSilently().then(getCurrentUser).then((profile) => {
+      if (!profile?.name?.trim() || !/^\d{10}$/.test(profile?.contact_info || '')) {
+        navigate('/profile', { replace: true, state: { returnTo: target, message: 'Complete your name and 10-digit phone number before posting a listing.' } })
+      } else setCheckingProfile(false)
+    }).catch((err) => {
+      setGuardError(err.response?.data?.error || 'Could not verify your profile. Please try again.')
+      setCheckingProfile(false)
+    })
+  }, [isLoading, isAuthenticated, getAccessTokenSilently, loginWithRedirect, location.pathname, location.search, location.hash, navigate])
 
   // Handle file selection
   const handleImageChange = (e) => {
-    // Convert FileList to an array
-    setImages(Array.from(e.target.files))
+    const selected = Array.from(e.target.files)
+    if (selected.length + images.length > 5) {
+      setFeedback('You can add up to 5 images. Remove an image before adding more.')
+      e.target.value = ''
+      return
+    }
+    setFeedback('')
+    setImages([...images, ...selected])
   }
 
   const removeImage = (indexToRemove) => {
@@ -44,6 +74,7 @@ export default function CreateListing() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSaving(true)
+    setFeedback('')
     try {
       const token = await getAccessTokenSilently()
       
@@ -68,11 +99,11 @@ export default function CreateListing() {
       // 3. Send the FormData to the API!
       await createListing(formData, token)
       
-      alert("Listing created successfully!")
+      setFeedback('Listing created successfully. Opening your profile…')
       navigate('/profile')
     } catch (error) {
       console.error("Failed to create listing:", error)
-      alert("Failed to create listing. Please try again.")
+      setFeedback(error.response?.data?.error || 'Could not create your listing. Please try again.')
     } finally {
       setSaving(false)
     }
@@ -81,8 +112,11 @@ export default function CreateListing() {
   return (
     <div className="create-listing-window">
       <h1>Create a New Listing</h1>
+      {guardError && <p className="create-listing-feedback" role="alert">{guardError}</p>}
+      {checkingProfile ? <LoadingSpinner label="Checking your profile…" /> : guardError ? null : (
       
       <form className="create-listing-form" onSubmit={handleSubmit}>
+        {feedback && <p className={`create-listing-feedback ${saving ? 'is-pending' : ''}`} role="status">{feedback}</p>}
         
         <label>
           Title
@@ -134,7 +168,8 @@ export default function CreateListing() {
         <div className="file-upload-section">
           <label className="file-upload-label">
             Upload Images (Max 5)
-            <input type="file" multiple accept="image/*" onChange={handleImageChange} ref={fileInputRef} />
+            <input type="file" multiple accept="image/*" onChange={handleImageChange} ref={fileInputRef} aria-describedby="image-count" />
+            <span id="image-count" className="file-count">{images.length} of 5 images selected</span>
           </label>
 
           {/* NEW: Display the list of selected files with a remove button */}
@@ -162,6 +197,7 @@ export default function CreateListing() {
           Post Listing
         </button>
       </form>
+      )}
     </div>
   )
 }

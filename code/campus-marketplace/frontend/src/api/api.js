@@ -62,7 +62,7 @@ export const registerUser = async (formData, token) => {
 
 // PUT /api/users/me — body: { name?, contact_info? }
 export const updateCurrentUser = async (formData, token) => {
-  const response = await api.put('/api/users/me', formData, {
+  const response = await api.patch('/api/users/me', formData, {
     headers: { Authorization: `Bearer ${token}` }
   })
   return response.data
@@ -185,6 +185,9 @@ export const createBorrowingReview = ({ borrowing_id, rating, comment }, token) 
 
 export const getUserPublicProfile = (userId) =>
   api.get(`/api/users/${userId}`).then((r) => r.data)
+
+export const searchUsers = (query) =>
+  api.get('/api/users/search', { params: { query } }).then((r) => r.data)
 
 export default api
 

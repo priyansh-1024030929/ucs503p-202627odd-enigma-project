@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import { getCurrentUser, registerUser } from '../api/api'
 import LoadingSpinner from './LoadingSpinner'
 import '../pages/ProfileWindow.css'
+import { restoreReturnScroll } from '../auth/navigation'
 
 export default function RequireProfileSetup({ children }) {
   const { isAuthenticated, getAccessTokenSilently, user: auth0User, isLoading } = useAuth0()
@@ -10,6 +12,14 @@ export default function RequireProfileSetup({ children }) {
   const [checking, setChecking] = useState(true)
   const [form, setForm] = useState({ name: '', contact_info: '' })
   const [saving, setSaving] = useState(false)
+  const [feedback, setFeedback] = useState('')
+  const location = useLocation()
+
+  useEffect(() => {
+    if (!isLoading && !checking && isRegistered) {
+      restoreReturnScroll(`${location.pathname}${location.search}${location.hash}`)
+    }
+  }, [isLoading, checking, isRegistered, location.pathname, location.search, location.hash])
 
   useEffect(() => {
     // 1. Wait for Auth0 to finish loading
@@ -28,7 +38,6 @@ export default function RequireProfileSetup({ children }) {
         const user = await getCurrentUser(token)
         
         if (!user) {
-          // TRAP DOOR: User doesn't exist! Block the app and show the form.
           setIsRegistered(false)
           setForm({ 
             name: auth0User?.name || auth0User?.nickname || '', 
@@ -47,6 +56,11 @@ export default function RequireProfileSetup({ children }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setFeedback('')
+    if (form.contact_info && !/^\d{10}$/.test(form.contact_info)) {
+      setFeedback('Phone number must contain exactly 10 digits, or leave it blank for now.')
+      return
+    }
     setSaving(true)
     
     try {
@@ -58,7 +72,7 @@ export default function RequireProfileSetup({ children }) {
       setIsRegistered(true) 
     } catch (error) {
       console.error("Registration failed:", error)
-      alert("Failed to save profile. Please try again.")
+      setFeedback(error.response?.data?.error || 'Could not save your profile. Please try again.')
     } finally {
       setSaving(false)
     }
@@ -76,11 +90,12 @@ export default function RequireProfileSetup({ children }) {
       <div className="profile-window" style={{ marginTop: '80px' }}>
         <h1>Welcome to Campus Marketplace!</h1>
         <p style={{ fontFamily: 'var(--font-mono)', color: 'var(--profile-text-muted)' }}>
-          Please complete your profile to continue.
+          Add your name and phone if you like. You can browse without them and complete your profile before posting or requesting an item.
         </p>
 
         <section className="profile-card">
           <form className="profile-edit-form" onSubmit={handleSubmit}>
+            {feedback && <p role="alert" className="description-error-msg">{feedback}</p>}
             <label htmlFor="setup-name">
               Name
               <input
@@ -89,24 +104,29 @@ export default function RequireProfileSetup({ children }) {
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="Enter your full name"
-                required
+                autoComplete="name"
               />
             </label>
             <label htmlFor="setup-phone">
               Phone Number
               <input
                 id="setup-phone"
-                type="text"
+                type="tel"
+                inputMode="numeric"
+                pattern="[0-9]{10}"
+                maxLength={10}
+                autoComplete="tel-national"
                 value={form.contact_info}
                 onChange={(e) => setForm({ ...form, contact_info: e.target.value })}
                 placeholder="Enter your phone number"
-                required
+                aria-describedby="setup-phone-help"
               />
+              <small id="setup-phone-help">Optional for browsing. Enter exactly 10 digits to use requests and listing tools.</small>
             </label>
             <div className="profile-edit-actions">
               <button type="submit" className="profile-save-btn" disabled={saving}>
                 {saving && <LoadingSpinner />}
-                Complete Profile
+                Save and continue
               </button>
             </div>
           </form>

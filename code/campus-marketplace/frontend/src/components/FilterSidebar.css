@@ -27,6 +27,10 @@
   margin: 0;
 }
 
+.filter-heading-row { display: flex; align-items: center; justify-content: space-between; }
+.filter-close-btn { display: none; }
+.filter-backdrop { display: none; }
+
 /* =========================================
    INPUTS & LABELS
    ========================================= */
@@ -189,10 +193,56 @@
    ========================================= */
 @media (max-width: 720px) {
   .filter-sidebar {
-    position: static; /* Drops back into normal flow for mobile */
-    width: 100%;
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: 301;
+    transform: translate(-50%, -50%);
+    width: min(calc(100vw - 24px), 400px);
     height: auto;
+    max-height: calc(100dvh - max(24px, env(safe-area-inset-top) + 12px));
+    overflow-y: auto;
+    overscroll-behavior: contain;
     border-right: none;
-    border-bottom: 1px solid var(--sidebar-border);
+    border: 1px solid var(--sidebar-border);
+    border-radius: 14px;
+    padding: 1.15rem;
+    gap: 1.1rem;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .28);
   }
+
+  .filter-sidebar.mobile-open { display: flex; }
+  .filter-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    border: 0;
+    background: rgba(9, 9, 11, .58);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .filter-close-btn {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--sidebar-input-border);
+    border-radius: 8px;
+    background: var(--sidebar-input-bg);
+    color: var(--sidebar-text);
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+  .filter-sidebar .filter-apply-btn,
+  .filter-sidebar .filter-reset-btn { min-height: 46px; }
+  .filter-sidebar .filter-field select { min-height: 44px; }
+  .filter-sidebar .price-slider { min-height: 32px; }
+  .filter-sidebar .price-slider input[type='range'] { top: 14px; }
+  .filter-sidebar .price-slider input[type='range']::-webkit-slider-thumb { width: 22px; height: 22px; margin-top: -9px; }
+  .filter-sidebar .price-slider input[type='range']::-moz-range-thumb { width: 22px; height: 22px; }
+}
+
+@media (max-width: 380px) {
+  .filter-sidebar { padding: 1rem; gap: .9rem; }
 }

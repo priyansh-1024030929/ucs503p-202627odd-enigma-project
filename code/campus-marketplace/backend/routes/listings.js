@@ -18,6 +18,8 @@ router.get('/', async (req, res) => {
         l.*, 
         c.name AS category_name,
         u.name AS owner_name,
+        u.user_id AS owner_id,
+        active_borrow.end_time AS borrowed_until,
         (
           SELECT image_url 
           FROM listing_images li 
@@ -28,7 +30,13 @@ router.get('/', async (req, res) => {
       FROM listings l
       LEFT JOIN categories c ON l.category_id = c.category_id
       LEFT JOIN users u ON l.owner_id = u.user_id
-      WHERE l.title ILIKE $1 
+      LEFT JOIN LATERAL (
+        SELECT b.end_time FROM borrowings b
+        WHERE b.listing_id = l.listing_id AND b.status IN ('BOOKED', 'ACTIVE')
+          AND b.start_time <= NOW() AND b.end_time > NOW()
+        ORDER BY b.end_time DESC LIMIT 1
+      ) active_borrow ON TRUE
+      WHERE l.status = 'ACTIVE' AND l.title ILIKE $1
       AND COALESCE(l.price, l.price_per_day) BETWEEN $2 AND $3
     `
     const params = [`%${query}%`, min, max]
@@ -93,6 +101,8 @@ router.get('/:id', async (req, res) => {
         l.*,
         c.name AS category_name,
         u.name AS owner_name,
+        u.user_id AS owner_id,
+        active_borrow.end_time AS borrowed_until,
         COALESCE(
           (
             SELECT json_agg(image_url ORDER BY created_at ASC)
@@ -104,6 +114,12 @@ router.get('/:id', async (req, res) => {
       FROM listings l
       LEFT JOIN categories c ON l.category_id = c.category_id
       LEFT JOIN users u ON l.owner_id = u.user_id
+      LEFT JOIN LATERAL (
+        SELECT b.end_time FROM borrowings b
+        WHERE b.listing_id = l.listing_id AND b.status IN ('BOOKED', 'ACTIVE')
+          AND b.start_time <= NOW() AND b.end_time > NOW()
+        ORDER BY b.end_time DESC LIMIT 1
+      ) active_borrow ON TRUE
       WHERE l.listing_id = $1
     `
     const { rows } = await pool.query(sql, [id])
@@ -132,6 +148,7 @@ const upload = multer({ storage: multer.memoryStorage() })
 // ==========================================
 router.post('/', requireAuth, upload.array('images', 5), async (req, res) => {
   const client = await pool.connect()
+  const successfullyUploadedFiles = []
   
   try {
     // START DB TRANSACTION
@@ -141,8 +158,12 @@ router.post('/', requireAuth, upload.array('images', 5), async (req, res) => {
     const { title, description, category_id, type, price, price_per_day } = req.body
 
     // Get the internal user_id
-    const userRes = await client.query('SELECT user_id FROM users WHERE auth_user_id = $1', [authId])
+    const userRes = await client.query('SELECT user_id, name, contact_info FROM users WHERE auth_user_id = $1', [authId])
     if (!userRes.rows[0]) throw new Error("User not found")
+    if (!userRes.rows[0].name?.trim() || !/^\d{10}$/.test(userRes.rows[0].contact_info || '')) {
+      await client.query('ROLLBACK')
+      return res.status(403).json({ error: 'Add your name and a valid 10-digit phone number before creating a listing.' })
+    }
     const sellerId = userRes.rows[0].user_id
 
     // Insert the Listing
@@ -154,8 +175,6 @@ router.post('/', requireAuth, upload.array('images', 5), async (req, res) => {
     const newListingId = listingRes.rows[0].listing_id
 
     // Upload Images to Supabase & Save URLs to Database
-    let successfullyUploadedFiles = [] 
-
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         const fileName = `${Date.now()}-${file.originalname.replace(/\s+/g, '-')}`
@@ -228,7 +247,7 @@ router.delete('/:id', requireAuth, async (req, res) => {
 
     // Verify ownership AND get the image URLs before we delete them
     const checkSql = `
-      SELECT l.owner_id, 
+      SELECT l.owner_id, l.status,
              COALESCE(json_agg(li.image_url) FILTER (WHERE li.image_url IS NOT NULL), '[]') as images
       FROM listings l
       LEFT JOIN listing_images li ON l.listing_id = li.listing_id
@@ -240,6 +259,9 @@ router.delete('/:id', requireAuth, async (req, res) => {
     if (!checkRes.rows[0]) return res.status(404).json({ error: "Listing not found" });
     if (checkRes.rows[0].owner_id !== userId) {
       return res.status(403).json({ error: "Unauthorized: Only the owner can delete this." });
+    }
+    if (checkRes.rows[0].status === 'SOLD') {
+      return res.status(409).json({ error: 'Sold listings are kept with their transaction history and cannot be deleted.' });
     }
 
     const imageUrls = checkRes.rows[0].images;

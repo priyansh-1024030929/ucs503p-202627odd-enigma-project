@@ -314,3 +314,40 @@ body.dark .profile-edit-form input:focus {
   background: rgba(234, 27, 35, 0.1);
   border-color: rgba(234, 27, 35, 0.2);
 }
+.profile-feedback { padding: .8rem 1rem; border-radius: 8px; background: rgba(234,27,35,.08); color: var(--profile-text); }
+.profile-load-error { padding: .9rem 1rem; border: 1px solid rgba(234,27,35,.25); border-radius: 8px; color: var(--profile-text); background: rgba(234,27,35,.08); }
+.request-user-link { color: var(--card-accent); }
+.request-date-range { color: var(--req-text-muted); font-size: .9rem; }
+.request-status-action,
+.inline-review-form button { min-height: 40px; padding: .55rem .8rem; border: 1px solid var(--card-border); border-radius: 7px; background: var(--card-bg); color: var(--card-text); font: 600 .82rem 'Inter', system-ui, sans-serif; cursor: pointer; }
+.request-status-action:disabled,
+.inline-review-form button:disabled { opacity: .6; cursor: wait; }
+.transaction-list { display: grid; gap: .8rem; }
+.transaction-card { display: grid; gap: .8rem; padding: 1rem; border: 1px solid var(--card-border); border-radius: 10px; background: var(--card-bg); color: var(--card-text); }
+.transaction-card > div:first-child { display: flex; align-items: center; justify-content: space-between; gap: .8rem; }
+.transaction-card > div:first-child a { color: var(--card-accent); }
+.inline-review-form { display: grid; grid-template-columns: minmax(100px, .35fr) minmax(180px, 1fr) auto; align-items: end; gap: .65rem; }
+.inline-review-form label { display: grid; gap: .3rem; color: var(--profile-text-muted); font-size: .75rem; }
+.inline-review-form input,
+.inline-review-form select { width: 100%; min-height: 40px; padding: .5rem .6rem; border: 1px solid var(--card-border); border-radius: 7px; background: var(--card-bg); color: var(--card-text); font: 400 .82rem 'Inter', system-ui, sans-serif; }
+
+@media (max-width: 680px) {
+  .profile-window { padding: 1.25rem 1rem; gap: 1.35rem; }
+  .profile-card { padding: 1.15rem; }
+  .requests-container { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; margin-top: 1.25rem; }
+  .request-card { align-items: stretch; flex-direction: column; gap: .75rem; padding: .95rem; }
+  .request-actions { display: flex; gap: .65rem; }
+  .request-actions button { flex: 1; min-height: 44px; }
+  .profile-edit-actions { flex-wrap: wrap; }
+  .profile-edit-actions button, .profile-save-btn, .profile-edit-btn { min-height: 44px; }
+  .section-header { flex-wrap: wrap; gap: .75rem; }
+  .inline-review-form { grid-template-columns: 1fr; }
+  .transaction-card > div:first-child { align-items: flex-start; flex-direction: column; }
+  .profile-list li { align-items: flex-start !important; flex-wrap: wrap; gap: .75rem; padding: .9rem; }
+  .profile-list li > div { flex-wrap: wrap; gap: .5rem !important; min-width: 0; }
+}
+
+@media (max-width: 380px) {
+  .profile-window { padding-inline: .75rem; }
+  .profile-field { align-items: flex-start; flex-direction: column; gap: .25rem; }
+}

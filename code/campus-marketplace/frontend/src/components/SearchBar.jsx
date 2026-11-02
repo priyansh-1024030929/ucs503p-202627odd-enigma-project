@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import LoadingSpinner from './LoadingSpinner'
 import './SearchBar.css'
 
-export default function SearchBar({ onSearch, loading }) {
-  const [query, setQuery] = useState("")
+export default function SearchBar({ onSearch, loading, initialQuery = '' }) {
+  const [query, setQuery] = useState(initialQuery)
+  useEffect(() => setQuery(initialQuery), [initialQuery])
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -16,6 +17,7 @@ export default function SearchBar({ onSearch, loading }) {
         <input
          type="text"
          className="search-input"
+          aria-label="Search listings"
           placeholder="Search Listings..."
           value={query || ""}
           onChange={(e) => setQuery(e.target.value)}

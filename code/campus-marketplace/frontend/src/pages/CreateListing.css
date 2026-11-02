@@ -2,11 +2,18 @@
   max-width: 600px;
   margin: 64px auto 2rem auto;
   padding: 2rem;
-  background: var(--bg-surface); 
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-radius: 12px;
-  color: var(--text-primary);
+  color: var(--card-text);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
+
+.create-listing-feedback { margin: 0; padding: .75rem 1rem; border-radius: 8px; color: #9f1d23; background: rgba(234, 27, 35, .09); }
+.create-listing-feedback.is-pending { color: var(--card-text-muted); background: var(--card-bg-hover); }
+.create-listing-window { margin-top: 84px; }
+
+@media (max-width: 640px) { .create-listing-window { margin: 78px 1rem 1.5rem; padding: 1.25rem; } }
 
 .create-listing-window h1 {
   margin-bottom: 1.5rem;

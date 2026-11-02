@@ -9,6 +9,7 @@ import usersRouter from './routes/users.js'
 import transactionsRouter from './routes/transactions.js'
 import purchaseRequestsRouter from './routes/purchaseRequests.js'
 import borrowingsRouter from './routes/borrowings.js'
+import reviewsRouter from './routes/reviews.js'
 
 
 const app = express()
@@ -24,6 +25,7 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok' }))
 app.use('/api/requests', requestsRouter)
 app.use('/api/purchase-requests', purchaseRequestsRouter)
 app.use('/api/borrowings', borrowingsRouter)
+app.use('/api/reviews', reviewsRouter)
 
 const PORT = process.env.PORT || 5000
 app.listen(PORT, () => console.log(`Campus Marketplace API running on port ${PORT}`))

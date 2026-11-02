@@ -1,12 +1,15 @@
-import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import { getListingById, createPurchaseRequest, createBorrowing, getErrorMessage, getCurrentUser } from '../api/api'
 import LoadingSpinner from '../components/LoadingSpinner'
 import './ListingDescription.css'
+import { beginLogin } from '../auth/navigation'
 
 export default function ListingDescription() {
   const { id } = useParams()
+  const location = useLocation()
+  const navigate = useNavigate()
   const { user, getAccessTokenSilently, isAuthenticated, loginWithRedirect } = useAuth0()
   const [listing, setListing] = useState(null)
   const [currentUser, setCurrentUser] = useState(null)
@@ -14,8 +17,10 @@ export default function ListingDescription() {
   const [submitting, setSubmitting] = useState(false)
   const [requestSent, setRequestSent] = useState(false)
   const [error, setError] = useState(null)
-  const [dates, setDates] = useState({ start: '', end: '' })
+  const [loadError, setLoadError] = useState(null)
+  const [dates, setDates] = useState(() => location.state?.requestDates || { start: '', end: '' })
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const resumedAction = useRef(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,6 +37,7 @@ export default function ListingDescription() {
         }
       } catch (err) {
         console.error("Failed to fetch data:", err)
+        setLoadError(getErrorMessage(err))
       } finally {
         setLoading(false)
       }
@@ -39,8 +45,23 @@ export default function ListingDescription() {
     fetchData()
   }, [id, isAuthenticated, getAccessTokenSilently, user])
 
+  useEffect(() => {
+    if (!listing?.borrowed_until) return undefined
+    const wait = new Date(listing.borrowed_until).getTime() - Date.now()
+    if (wait <= 0) {
+      getListingById(id).then(setListing).catch(() => {})
+      return undefined
+    }
+    const timer = window.setTimeout(() => getListingById(id).then(setListing).catch(() => {}), wait + 50)
+    return () => window.clearTimeout(timer)
+  }, [id, listing?.borrowed_until])
+
   const handleBuyRequest = async () => {
-    if (!isAuthenticated) return loginWithRedirect()
+    if (!isAuthenticated) return beginLogin(loginWithRedirect, { appState: { returnTo: `${location.pathname}${location.search}${location.hash}` } })
+    if (!currentUser?.name?.trim() || !/^\d{10}$/.test(currentUser?.contact_info || '')) {
+      navigate('/profile', { state: { returnTo: `${location.pathname}${location.search}${location.hash}`, message: 'Add your name and a valid 10-digit phone number before requesting an item.', continueAction: 'buy', requestDates: dates } })
+      return
+    }
     setSubmitting(true)
     setError(null)
     try {
@@ -49,14 +70,23 @@ export default function ListingDescription() {
       setRequestSent(true)
     } catch (err) {
       setError(getErrorMessage(err))
+      if (err.response?.status === 409) getListingById(id).then(setListing).catch(() => {})
     } finally {
       setSubmitting(false)
     }
   }
 
   const handleBorrowRequest = async (e) => {
-    e.preventDefault()
-    if (!isAuthenticated) return loginWithRedirect()
+    e?.preventDefault()
+    if (!dates.start || !dates.end || new Date(dates.end) <= new Date(dates.start)) {
+      setError('Choose an end time after the start time.')
+      return
+    }
+    if (!isAuthenticated) return beginLogin(loginWithRedirect, { appState: { returnTo: `${location.pathname}${location.search}${location.hash}` } })
+    if (!currentUser?.name?.trim() || !/^\d{10}$/.test(currentUser?.contact_info || '')) {
+      navigate('/profile', { state: { returnTo: `${location.pathname}${location.search}${location.hash}`, message: 'Add your name and a valid 10-digit phone number before requesting an item.', continueAction: 'borrow', requestDates: dates } })
+      return
+    }
     setSubmitting(true)
     setError(null)
     try {
@@ -69,16 +99,29 @@ export default function ListingDescription() {
       setRequestSent(true)
     } catch (err) {
       setError(getErrorMessage(err))
+      if (err.response?.status === 409) getListingById(id).then(setListing).catch(() => {})
     } finally {
       setSubmitting(false)
     }
   }
 
+  useEffect(() => {
+    const action = location.state?.continueAction
+    if (!action || loading || !isAuthenticated || !currentUser || resumedAction.current) return
+    resumedAction.current = true
+    navigate(`${location.pathname}${location.search}${location.hash}`, { replace: true, state: null })
+    if (action === 'buy') handleBuyRequest()
+    if (action === 'borrow') handleBorrowRequest()
+  }, [location.key, currentUser, listing, loading, isAuthenticated])
+
   if (loading) return <LoadingSpinner fullPage label="Loading listing..." />
-  if (!listing) return <p className="description-error">Listing not found.</p>
+  if (!listing) return <div className="description-error" role="alert"><p>{loadError || 'Listing not found.'}</p><Link to="/browse">Back to listings</Link></div>
 
   const isOwner = currentUser?.user_id === listing.owner_id
   const images = listing?.images || []
+  const borrowedUntil = listing.borrowed_until ? new Date(listing.borrowed_until) : null
+  const isBorrowed = borrowedUntil && borrowedUntil > new Date()
+  const localDateTimeMin = (() => { const now = new Date(); now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); return now.toISOString().slice(0, 16) })()
 
   return (
     <div className="description-window">
@@ -96,7 +139,7 @@ export default function ListingDescription() {
               {/* Fallback to img.image_url if your backend sends objects instead of strings */}
               <img 
                 src={images[currentImageIndex]?.image_url || images[currentImageIndex]} 
-                alt="Listing" 
+                alt={`${listing.title} — photo ${currentImageIndex + 1}`} 
                 className="main-image" 
               />
             </div>
@@ -108,9 +151,14 @@ export default function ListingDescription() {
                   <img
                     key={idx}
                     src={img.image_url || img}
-                    alt={`Thumbnail ${idx}`}
+                    alt={`Show photo ${idx + 1}`}
                     className={`thumbnail ${idx === currentImageIndex ? 'active' : ''}`}
                     onClick={() => setCurrentImageIndex(idx)}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`Show photo ${idx + 1}`}
+                    aria-pressed={idx === currentImageIndex}
+                    onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setCurrentImageIndex(idx) } }}
                   />
                 ))}
               </div>
@@ -124,6 +172,7 @@ export default function ListingDescription() {
       </div>
 
         <div className="description-details">
+          {isBorrowed && <p className="borrowed-notice" role="status">Currently borrowed · expected back {borrowedUntil.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</p>}
           {listing.status === 'SOLD' && (
           <div className="sold-badge">
             Sold Out
@@ -138,7 +187,7 @@ export default function ListingDescription() {
 
           <div className="description-meta">
             <p>
-              <strong>Owner:</strong> {listing.owner_name}
+              <strong>Listed by:</strong> <Link to={`/users/${listing.owner_id}`} className="owner-profile-link">{listing.owner_name || 'Campus member'}</Link>
             </p>
           </div>
 
@@ -163,6 +212,8 @@ export default function ListingDescription() {
               {submitting && <LoadingSpinner />}
               Request to buy
             </button>
+          ) : isBorrowed ? (
+            <button className="description-contact-btn" disabled>Currently borrowed</button>
           ) : (
             <form className="description-borrow-form" onSubmit={handleBorrowRequest}>
               <label>
@@ -171,6 +222,7 @@ export default function ListingDescription() {
                   type="datetime-local"
                   required
                   value={dates.start}
+                  min={localDateTimeMin}
                   onChange={(e) => setDates({ ...dates, start: e.target.value })}
                 />
               </label>
@@ -180,6 +232,7 @@ export default function ListingDescription() {
                   type="datetime-local"
                   required
                   value={dates.end}
+                  min={dates.start || localDateTimeMin}
                   onChange={(e) => setDates({ ...dates, end: e.target.value })}
                 />
               </label>

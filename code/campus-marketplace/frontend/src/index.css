@@ -90,11 +90,8 @@
 body {
   margin: 0;
   background-color: var(--page-bg);
-  background-image: 
-    radial-gradient(var(--pattern-dot) 3px, transparent 3px),
-    radial-gradient(var(--pattern-dot) 3px, transparent 3px);
-  background-size: 40px 40px;
-  background-position: 0 0, 20px 20px;
+  background-image: radial-gradient(var(--pattern-dot) 1px, transparent 1px);
+  background-size: 24px 24px;
   
   /* Smooth theme transitions */
   transition: background-color 0.4s ease, background-image 0.4s ease;

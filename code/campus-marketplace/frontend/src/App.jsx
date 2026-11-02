@@ -12,6 +12,8 @@ import ListingDescription from './pages/ListingDescription'
 import ProfileWindow from './pages/ProfileWindow'
 import RequireProfileSetup from './components/RequireProfileSetup'
 import CreateListing from './pages/CreateListing'
+import UserDirectory from './pages/UserDirectory'
+import PublicProfile from './pages/PublicProfile'
 import { setAccessTokenGetter } from './api/api'
 import './App.css'
 
@@ -39,6 +41,8 @@ export default function App() {
                   <Route path="/listing/:id" element={<ListingDescription />} />
                   <Route path="/profile" element={<ProfileWindow />} />
                   <Route path="/create-listing" element={<CreateListing />} />
+                  <Route path="/users" element={<UserDirectory />} />
+                  <Route path="/users/:id" element={<PublicProfile />} />
                 </Routes>
               </RequireProfileSetup>
             } 
